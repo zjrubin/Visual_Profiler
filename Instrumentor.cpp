@@ -1,7 +1,11 @@
 #include "Instrumentor.h"
 #include <algorithm>
 
-using namespace std;
+using std::string;
+
+const char* const indent_1_c = "\n\t";
+const char* const indent_2_c = "\n\t\t";
+const char* const indent_3_c = "\n\t\t\t";
 
 Instrumentor::Instrumentor()
     : m_profile_count{ 0 }
@@ -24,33 +28,36 @@ void Instrumentor::end_session()
 
 void Instrumentor::write_header()
 {
-    m_output_stream << "{\n\t\"otherData\": {},\n\t\"traceEvents\": [\n";
+    m_output_stream << "{";
+    m_output_stream << indent_1_c << "\"otherData\": {},";
+    m_output_stream << indent_1_c << "\"traceEvents\": [";
     m_output_stream.flush();
 }
 
 void Instrumentor::write_profile(const Profile_Result& result)
 {
-    if (m_profile_count++ > 0)
+    if (1 < ++m_profile_count)
         m_output_stream << ",";
 
     string name = result.name;
     replace(name.begin(), name.end(), '"', '\'');
 
-    m_output_stream << "\t\t{";
-    m_output_stream << "\n\t\t\t\"cat\": \"function\",";
-    m_output_stream << "\n\t\t\t\"dur\": " << (result.end - result.start) << ',';
-    m_output_stream << "\n\t\t\t\"name\": \"" << name << "\",";
-    m_output_stream << "\n\t\t\t\"ph\": \"X\",";
-    m_output_stream << "\n\t\t\t\"pid\": 0,";
-    m_output_stream << "\n\t\t\t\"tid\": " << result.thread_ID << ',';
-    m_output_stream << "\n\t\t\t\"ts\": " << result.start;
-    m_output_stream << "\n\t\t}";
+    m_output_stream << indent_2_c << "{";
+    m_output_stream << indent_3_c << "\"cat\": \"function\",";
+    m_output_stream << indent_3_c << "\"dur\": " << (result.end - result.start) << ',';
+    m_output_stream << indent_3_c << "\"name\": \"" << name << "\",";
+    m_output_stream << indent_3_c << "\"ph\": \"X\",";
+    m_output_stream << indent_3_c << "\"pid\": 0,";
+    m_output_stream << indent_3_c << "\"tid\": " << result.thread_ID << ',';
+    m_output_stream << indent_3_c << "\"ts\": " << result.start;
+    m_output_stream << indent_2_c << "}";
 
     m_output_stream.flush();
 }
 
 void Instrumentor::write_footer()
 {
-    m_output_stream << "\n\t]\n}";
+    m_output_stream << indent_1_c << "]"; 
+    m_output_stream << "\n}";
     m_output_stream.flush();
 }

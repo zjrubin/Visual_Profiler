@@ -14,6 +14,18 @@
 #include "Instrumentor.h"
 #include <chrono>
 
+#define PROFILE_SCOPE_SIG_DETAIL(name, line) Instrumentation_Timer timer_##line(name)
+#define PROFILE_SCOPE_SIG(name, line) PROFILE_SCOPE_SIG_DETAIL(name, line)
+
+#define PROFILING 1
+#if PROFILING
+    #define PROFILE_SCOPE(name) PROFILE_SCOPE_SIG(name, __LINE__) // Profiling on
+    #define PROFILE_FUNCTION() PROFILE_SCOPE(__FUNCSIG__)
+#else
+    #define PROFILE_SCOPE(name) // Profiling off
+    #define PROFILE_FUNCTION()
+#endif
+
 class Instrumentation_Timer
 {
 public:
